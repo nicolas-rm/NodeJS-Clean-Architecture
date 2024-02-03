@@ -2,7 +2,7 @@
 // Se utiliza para implementar el patrón de inyección de dependencias
 
 import { UserModel } from "../../db/mongodb/index.db";
-import { AuthDataSource, CustomError, RegisterUserDto, UserEntity } from "../../domain/index.domain";
+import { AuthDataSource, CustomError, LoginUserDto, RegisterUserDto, UserEntity } from "../../domain/index.domain";
 import { Bcrypt } from '../../config/bcrypt';
 import { UserMapper } from "../index.infraestructure";
 
@@ -12,6 +12,32 @@ type CompareSyncPassword = (password: string, hash: string) => boolean
 export class AuthDataSourceImplementation implements AuthDataSource {
 
     constructor(private readonly hashSyncPassword: HashSyncPassword = Bcrypt.hash, private readonly compareSyncPassword: CompareSyncPassword = Bcrypt.compare) {
+    }
+
+    async login(loginUserDto: LoginUserDto): Promise<UserEntity> {
+        const { email, password } = loginUserDto
+        try {
+            // Crear usuario
+            const user = await UserModel.findOne({ email })
+
+            if (!user) throw CustomError.badRequest('El usuario no existe')
+
+            // Comparar contraseña
+            if (!this.compareSyncPassword(password, user.password)) {
+                // Si la contraseña no coincide
+                throw CustomError.badRequest('La contraseña no coincide')
+            }
+
+            // mapear la respuesta a nuestra entidad
+            return UserMapper.userEntityToModel(user)
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error
+            }
+
+            throw CustomError.internalServerError('')
+        }
+
     }
 
     async register(registerUserDto: RegisterUserDto): Promise<UserEntity> {

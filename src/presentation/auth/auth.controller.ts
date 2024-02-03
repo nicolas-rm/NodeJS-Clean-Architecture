@@ -1,7 +1,7 @@
 // Clase authController
 
 import { Request, Response } from "express"
-import { AuthRepository, CustomError, RegisterUserDto, RegisterUserUseCaseImplementation } from "../../domain/index.domain"
+import { AuthRepository, CustomError, LoginUserDto, LoginUserUseCaseImplementation, RegisterUserDto, RegisterUserUseCaseImplementation } from "../../domain/index.domain"
 import { Jwt } from "../../config/jwt"
 import { UserModel } from "../../db/mongodb/index.db"
 
@@ -44,10 +44,24 @@ export class AuthController {
 
 
     // Login de usuario
-    loginUser = (req: Request, res: Response) => {
-        res.json({
-            message: 'Usuario logueado'
-        })
+    loginUser = async (req: Request, res: Response) => {
+        try {
+
+            // Validar todos los campos
+            const [error, loginUserDto] = LoginUserDto.login(req.body);
+
+            // Si hay un error
+            if (error) return res.status(400).json({ error });
+
+            // Login
+            const user = await (new LoginUserUseCaseImplementation(this.authRepository, Jwt.sing).execute(loginUserDto!));
+
+            // Si no hay error
+            res.status(200).json(user);
+        } catch (error) {
+
+            this.handleError(error, res);
+        }
     }
 
     // Obtener usuarios

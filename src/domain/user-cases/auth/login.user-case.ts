@@ -1,13 +1,11 @@
 import { Jwt } from '../../../config/jwt';
-import { CustomError, RegisterUserDto } from '../../index.domain';
+import { CustomError, LoginUserDto } from '../../index.domain';
 import { AuthRepository } from '../../repositories/auth.domain.repository';
 
-// Esta interfaz es para el caso de uso de registro de usuario
-interface RegisterUserUseCase {
-    execute(registerUserDto: RegisterUserDto): Promise<any>
+interface LoginUserUseCase {
+    execute(loginUserDto: LoginUserDto): Promise<any>
 }
 
-// Token Usuario
 interface UserToken {
     token: string
     user: {
@@ -20,16 +18,13 @@ interface UserToken {
 // Tipo Token
 type SignToken = (payload: Object, duration?: string) => Promise<string | null>
 
-export class RegisterUserUseCaseImplementation implements RegisterUserUseCase {
-
+export class LoginUserUseCaseImplementation implements LoginUserUseCase {
     //Inyectar dependencias
     constructor(private readonly authRepository: AuthRepository, private readonly sign: SignToken = Jwt.sing) { }
 
-    // Aquí se inyecta el repositorio de usuarios
-    async execute(registerUserDto: RegisterUserDto): Promise<UserToken> {
+    async execute(loginUserDto: LoginUserDto): Promise<UserToken> {
 
-        // Crear usuario
-        const user = await this.authRepository.register(registerUserDto)
+        const user = await this.authRepository.login(loginUserDto)
 
         // Token
         const token = await this.sign({ id: user.id })
