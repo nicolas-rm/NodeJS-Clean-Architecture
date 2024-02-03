@@ -1,0 +1,22 @@
+// Configuraciones de Gitignore, cosas a ignorar
+
+# Node: Modulos de Node
+node_modules/
+
+# Dist: Archivos compilados
+dist/
+
+# Build: Archivos de desarrollo
+build/
+
+# Configuraciones de IDE
+.env
+
+# Mongo: Archivos de Mongo
+mongo/
+
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
+
