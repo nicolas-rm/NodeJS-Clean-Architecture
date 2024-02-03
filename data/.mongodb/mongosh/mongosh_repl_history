@@ -1,9 +1,0 @@
-show dbs
-exit
-show dbs
-show users
-use mongodb
-show users
-use admin
-show dbs
-show users
